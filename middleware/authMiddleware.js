@@ -3,6 +3,7 @@ import UserDetails from "../models/userModel.js";
 
 
 
+
 // const userMiddleware = async (req, res, next) => {
     // const token = req.header('x-auth-token');
 //     const authHeader = req.header.authorization;
@@ -40,11 +41,15 @@ const userMiddleware = async (req, res, next) => {
         if (!token) return res.status(401).json({ message: 'Access denied. No token provided.' });
 
         const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        req.user = decoded; // Store decoded token payload
+        // req.user = decoded; // Store decoded token payload
 
         const userExists = await UserDetails.findById(decoded.id);
-        if (!userExists) return res.status(401).json({ message: 'User not found' });
 
+        if (!userExists) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        req.userExists = {id: userExists.id, isAdmin: userExists.isAdmin};
         next();
     } catch (error) {
         res.status(401).json({ message: 'Invalid or expired token' });
