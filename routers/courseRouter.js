@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 
 import { addUser, buyCourse, courseDetails, deletCourse, getAllUsers, updateCourse} from '../controllers/courseController.js';
+import userMiddleware from '../middleware/authMiddleware.js'
 
 const router = express.Router();
 // Multer configuration for file uploads
@@ -17,5 +18,5 @@ router.put('/update/:courseId', updateCourse);
 router.delete('/delete/:courseId', deletCourse);
 router.get('/show/:courseId', courseDetails);
 
-router.post("/buy/:courseId", buyCourse)
+router.post('/buy/:courseId', userMiddleware, buyCourse)
 export default router;

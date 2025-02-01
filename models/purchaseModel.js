@@ -2,14 +2,22 @@ import mongoose from 'mongoose';
 
 
 const purchaseSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Types.ObjectId,
-        ref : "UserDetails" 
+    userId: 
+    { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'UserDetails', 
+        required: true 
     },
-
-    courseId: {
-        type: mongoose.Types.ObjectId,
-        ref : "User" 
+    courseId: 
+    { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+    },
+    purchasedAt: 
+    { 
+        type: Date, 
+        default: Date.now 
     }
     
     

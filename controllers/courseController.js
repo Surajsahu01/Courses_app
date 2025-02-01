@@ -249,34 +249,61 @@ export const courseDetails = async(req, res) =>{
 }
 
 
-export const buyCourse = async(req,res) => {
-    const {userId} = req;
-    console.log(userId);
+// export const buyCourse = async(req,res) => {
     
-    const {courseId} = req.params;
+    // const {userId} = req;
+    // const {courseId} = req.params;
 
+    // try {
+    //     const course = await User.findById(courseId);
+    //     if(!course){
+    //         return res.status(400).json({error: "Course Not Found"});
+    //     }
+    //     const existingParchase = await Purchase.findOne({userId, courseId});
+    //     if(existingParchase){
+    //         res.status(200).json({message: "User has already purchase this course."});
+    //     }
+        
+    //     const newPurchase = new Purchase({userId,courseId});
+    //     await newPurchase.save();
+    //     res.status(201).json({message:"cousre add successfull", newPurchase})
+       
+
+    // } catch (error) {
+    //     res.status(500).json({
+    //         error: "Error in course buying"
+    //     })
+    //     console.log("Error in course buying", error);
+        
+        
+    // }
+
+
+export const buyCourse = async(req,res) => {
     try {
-        const course = await User.findById(courseId);
-        if(!course){
-            return res.status(400).json({error: "Course Not Found"});
-        }
-        const existingParchase = await Purchase.findOne({userId, courseId});
-        if(existingParchase){
-            res.status(200).json({message: "User has already purchase this course."});
-        }
-        
-        const newPurchase = new Purchase({userId,courseId});
-        await newPurchase.save();
-        res.status(201).json({message:"cousre add successfull", newPurchase})
+        const { courseId } = req.params;
+        const userId = req.user.id; // Retrieved from auth middleware
 
-    } catch (error) {
-        res.status(500).json({
-            error: "Error in course buying"
-        })
-        console.log("Error in course buying", error);
-        
+        // Check if the course exists
+        const course = await User.findById(courseId);
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        // Check if the user already purchased the course
+        const existingPurchase = await Purchase.findOne({ userId, courseId });
+        if (existingPurchase) {
+            return res.status(400).json({ message: 'You have already purchased this course' });
+        }
+
+        // Create a new purchase record
+        const newPurchase = new Purchase({ userId, courseId });
+        await newPurchase.save();
+
+        res.status(201).json({ message: 'Course purchased successfully', purchase: newPurchase });
+    } 
+    catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+        console.log("server error", error);
         
     }
 
-
-}
+};
