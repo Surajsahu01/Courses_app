@@ -3,6 +3,8 @@ import UserDetails from "../models/userModel.js";
 import bcrypt from "bcryptjs"
 import { z } from "zod";
 import jwt from "jsonwebtoken"
+import Purchase from "../models/purchaseModel.js";
+import User from "../models/courseModel.js";
 
 export const userSignup = async(req, res) =>{
     const { firstname, lastname, email, password } = req.body;
@@ -51,11 +53,19 @@ export const userLogin = async(req, res) => {
             return res.status(400).json({error:"Invalid credentials"});
         }
 
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, { expiresIn: '1d' });
 
 
-        // res.status(201).json({message:"Login Successfully.", user, token})
-        res.cookie("jwt", token);
+        res.status(201).json({message:"Login Successfully.", user, token})
+
+        const cookiesOptions = {
+            expires: new Date(Date.now() + 24*60 * 60 * 1000),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            semeSite: "Strict",
+        };
+
+        res.cookie("jwt", token, cookiesOptions);
         res.json({ token, user: { id: user._id, firstname: user.firstname, lastname: user.lastname, email: user.email, password: user.password } });
         
         
@@ -76,4 +86,30 @@ export const userLogout = (req, res)=>{
         
         
     }
+}
+
+export const purchaed = async(req,res) => {
+    const userId = req.userId;
+
+    try {
+
+        const purchaes = await Purchase.find({userId});
+
+        let purchaedCourseId = [];
+
+        for (let i=0; i<purchaes.length; i++){
+            purchaedCourseId.push(purchaes[i].courseId)
+        }
+
+        const courseData = await User.find({
+            _id: { $in: purchaedCourseId},
+        })
+        
+        res.status(200).json({purchaes, courseData})
+    } catch (error) {
+        res.status(500).json({errors: "erroe in purchaes"})
+        
+    }
+    
+   
 }
