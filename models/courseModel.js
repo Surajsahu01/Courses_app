@@ -23,8 +23,13 @@ const CourseSchema = new mongoose.Schema({
             required: true, 
         },
     },
+    
     localImagePath: { 
         type: String 
+    },
+    creatorId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Admin'
     },
 }, 
 { 

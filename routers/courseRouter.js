@@ -3,6 +3,7 @@ import multer from 'multer';
 
 import { addUser, buyCourse, courseDetails, deletCourse, getAllUsers, updateCourse} from '../controllers/courseController.js';
 import userMiddleware from '../middleware/authMiddleware.js'
+import adminMiddleware from '../middleware/adminMiddleware.js';
 
 const router = express.Router();
 // Multer configuration for file uploads
@@ -12,10 +13,10 @@ const upload = multer({
 });
 
 // Apply multer to the route
-router.post('/add-user', upload.single('image'), addUser);
+router.post('/create', upload.single('image'), adminMiddleware, addUser);
+router.put('/update/:courseId', adminMiddleware,updateCourse);
+router.delete('/delete/:courseId', adminMiddleware,deletCourse);
 router.get('/show', getAllUsers);
-router.put('/update/:courseId', updateCourse);
-router.delete('/delete/:courseId', deletCourse);
 router.get('/show/:courseId', courseDetails);
 
 router.post('/buy/:courseId', userMiddleware, buyCourse)

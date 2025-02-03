@@ -126,6 +126,7 @@ cloudinary.v2.config({
 
 
 export const addUser = async (req, res) => {
+    const adminId = req.adminId;
     const { title, description, price } = req.body;
 
     try {
@@ -153,6 +154,7 @@ export const addUser = async (req, res) => {
                 public_id: cloudinaryResult.public_id,
                 url: cloudinaryResult.url,
             },
+            creatorId: adminId,
         };
 
         // Save user to the database
@@ -184,13 +186,19 @@ export const getAllUsers = async (req, res) => {
     };
 
 export const updateCourse = async(req, res) => {
+    const adminId = req.adminId;
     const { courseId } = req.params;
     const { title, description, price, image} = req.body;
 
     try {
+        const courseSearh = await User.findById(courseId);
+        if(!courseSearh){
+            res.status(404).json({error: "course not found"})
+        }
         const course = await User.updateOne(
             {
                 _id: courseId,
+                creatorId: adminId,
             },
             {
                 title,
@@ -202,7 +210,7 @@ export const updateCourse = async(req, res) => {
                 },
             }
         );
-        res.status(201).json({message:"Course Update Succecfully"})
+        res.status(201).json({message:"Course Update Succecfully", course})
         
     } catch (error) {
         res.status(500).json({error:"Error is course updating"})
@@ -213,10 +221,16 @@ export const updateCourse = async(req, res) => {
     
 
 export const deletCourse = async(req, res) =>{
+    const adminId = req.adminId;
     const {courseId} = req.params;
     try {
+        const courseSearh = await User.findById(courseId);
+        if(!courseSearh){
+            res.status(404).json({error: "course not found"})
+        }
         const course = await User.findByIdAndDelete({
             _id: courseId,
+            creatorId: adminId,
         })
         if(!course){
             return res.status(404).json({error:"Course not Found"})
